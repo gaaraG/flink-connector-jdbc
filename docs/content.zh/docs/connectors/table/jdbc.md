@@ -55,6 +55,7 @@ JDBC 连接器不是二进制发行版的一部分，请查阅[这里]({{< ref "
 | Derby      | `org.apache.derby`         | `derby`                | [下载](http://db.apache.org/derby/derby_downloads.html)                                                                       |
 | SQL Server | `com.microsoft.sqlserver`  | `mssql-jdbc`           | [下载](https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16) |
 | CrateDB    | `io.crate`                 | `crate-jdbc`           | [下载](https://repo1.maven.org/maven2/io/crate/crate-jdbc/)                                                                   |
+| ClickHouse | `com.clickhouse`          | `clickhouse-jdbc`      | [下载](https://repo1.maven.org/maven2/com/clickhouse/clickhouse-jdbc/)                                                                   |
 | Db2        | `com.ibm.db2.jcc`          | `db2jcc`               | [下载](https://www.ibm.com/support/pages/download-db2-fix-packs-version-db2-linux-unix-and-windows)                           |
 | Trino      | `io.trino`                 | `trino-jdbc`           | [下载](https://repo1.maven.org/maven2/io/trino/trino-jdbc/)                                                                   |
 | OceanBase  | `com.oceanbase`            | `oceanbase-client`     | [下载](https://repo1.maven.org/maven2/com/oceanbase/oceanbase-client/)                                                        |
