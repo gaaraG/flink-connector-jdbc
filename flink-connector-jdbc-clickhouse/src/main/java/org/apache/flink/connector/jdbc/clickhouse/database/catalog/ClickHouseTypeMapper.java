@@ -98,6 +98,7 @@ public class ClickHouseTypeMapper implements JdbcCatalogTypeMapper {
         this.databaseVersion = databaseVersion;
         this.driverVersion = driverVersion;
     }
+
     // https://github.com/ClickHouse/clickhouse-java/blob/main/clickhouse-data/src/main/java/com/clickhouse/data/ClickHouseDataType.java
     private DataType toFlinkType(String rawType, String columnName) {
         String fullType = normalizeType(rawType).trim().toUpperCase();
