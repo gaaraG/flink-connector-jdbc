@@ -19,6 +19,7 @@
 package org.apache.flink.connector.jdbc.clickhouse.database;
 
 import org.apache.flink.annotation.Internal;
+import org.apache.flink.connector.jdbc.clickhouse.database.catalog.ClickHouseCatalog;
 import org.apache.flink.connector.jdbc.clickhouse.database.dialect.ClickHouseDialect;
 import org.apache.flink.connector.jdbc.core.database.JdbcFactory;
 import org.apache.flink.connector.jdbc.core.database.catalog.JdbcCatalog;
@@ -30,8 +31,7 @@ public class ClickHouseFactory implements JdbcFactory {
 
     @Override
     public boolean acceptsURL(String url) {
-        return url != null
-                && (url.startsWith("jdbc:clickhouse:") || url.startsWith("jdbc:ch:"));
+        return url != null && (url.startsWith("jdbc:clickhouse:") || url.startsWith("jdbc:ch:"));
     }
 
     @Override
@@ -47,6 +47,7 @@ public class ClickHouseFactory implements JdbcFactory {
             String username,
             String pwd,
             String baseUrl) {
-        throw new UnsupportedOperationException("Catalog for ClickHouse is not supported yet.");
+        return new ClickHouseCatalog(
+                classLoader, catalogName, defaultDatabase, username, pwd, baseUrl);
     }
 }

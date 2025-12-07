@@ -34,12 +34,18 @@ public class ClickHouseDialect extends AbstractDialect {
 
     private static final long serialVersionUID = 1L;
 
-    // ClickHouse supports DateTime64 with up to nanosecond precision.
+    // Define MAX/MIN precision of TIMESTAMP type according to Clickhouse docs:
+    // https://clickhouse.com/docs/sql-reference/data-types/datetime64
     private static final int MAX_TIMESTAMP_PRECISION = 9;
     private static final int MIN_TIMESTAMP_PRECISION = 0;
 
-    // ClickHouse decimal implementation allows up to 76 digits of precision.
-    private static final int MAX_DECIMAL_PRECISION = 76;
+    // Define MAX/MIN precision of DECIMAL type according to Clickhouse docs:
+    // https://clickhouse.com/docs/sql-reference/data-types/decimal
+    // ClickHouse supports up to 76 (Decimal256).
+    // HOWEVER, Flink's DecimalType only supports up to 38.
+    // We must limit this to 38 to match Flink's internal capabilities.
+    // Any ClickHouse Decimal with precision > 38 should be mapped to STRING in the TypeMapper.
+    private static final int MAX_DECIMAL_PRECISION = 38;
     private static final int MIN_DECIMAL_PRECISION = 1;
 
     @Override
@@ -101,6 +107,8 @@ public class ClickHouseDialect extends AbstractDialect {
                 LogicalTypeRoot.DOUBLE,
                 LogicalTypeRoot.DATE,
                 LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
-                LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE);
+                LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
+                LogicalTypeRoot.ARRAY,
+                LogicalTypeRoot.MAP);
     }
 }

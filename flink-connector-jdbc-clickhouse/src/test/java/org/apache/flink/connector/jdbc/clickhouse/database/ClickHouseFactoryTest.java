@@ -18,15 +18,17 @@
 
 package org.apache.flink.connector.jdbc.clickhouse.database;
 
+import org.apache.flink.connector.jdbc.clickhouse.ClickHouseTestBase;
+import org.apache.flink.connector.jdbc.clickhouse.database.catalog.ClickHouseCatalog;
 import org.apache.flink.connector.jdbc.clickhouse.database.dialect.ClickHouseDialect;
+import org.apache.flink.connector.jdbc.core.database.catalog.JdbcCatalog;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for {@link ClickHouseFactory}. */
-class ClickHouseFactoryTest {
+class ClickHouseFactoryTest implements ClickHouseTestBase {
 
     private final ClickHouseFactory factory = new ClickHouseFactory();
 
@@ -40,6 +42,7 @@ class ClickHouseFactoryTest {
     void testRejectsUnsupportedUrls() {
         assertThat(factory.acceptsURL(null)).isFalse();
         assertThat(factory.acceptsURL("jdbc:mysql://localhost:3306/db")).isFalse();
+        assertThat(factory.acceptsURL("jdbc:postgresql://localhost:5432/db")).isFalse();
     }
 
     @Test
@@ -48,18 +51,18 @@ class ClickHouseFactoryTest {
     }
 
     @Test
-    void testCatalogNotSupported() {
-        assertThatThrownBy(
-                        () ->
-                                factory.createCatalog(
-                                        getClass().getClassLoader(),
-                                        "clickhouse",
-                                        "default",
-                                        "user",
-                                        "pass",
-                                        "jdbc:clickhouse://localhost:8123/default"))
-                .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessageContaining("not supported");
+    void testCreateCatalog() {
+        JdbcCatalog catalog =
+                factory.createCatalog(
+                        Thread.currentThread().getContextClassLoader(),
+                        "clickhouse_catalog",
+                        "default",
+                        getMetadata().getUsername(),
+                        getMetadata().getPassword(),
+                        getMetadata().getJdbcUrl());
+
+        assertThat(catalog).isNotNull();
+        // Simply check that the catalog was created successfully
+        assertThat(catalog).isInstanceOf(ClickHouseCatalog.class);
     }
 }
-
