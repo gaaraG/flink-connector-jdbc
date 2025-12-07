@@ -221,7 +221,8 @@ public class ClickHouseCatalog extends AbstractJdbcCatalog {
                     // ClickHouse Sorting Keys are not Unique Constraints.
                     schemaBuilder.column(columnName, flinkType);
                 }
-                // TODO Do we need to store some of the retrieved metadata or incorporate it into the defined data?
+                // TODO Do we need to store some of the retrieved metadata or incorporate it into
+                // the defined data?
                 Map<String, String> ckTableProperties = getClickHouseTableMetadata(conn, tablePath);
 
                 Map<String, String> props = new HashMap<>();

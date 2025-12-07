@@ -274,7 +274,10 @@ public class ClickHouseTypeMapper implements JdbcCatalogTypeMapper {
                 }
             }
         } catch (NumberFormatException e) {
-            LOG.warn("Failed to parse precision/scale from '{}', using default (38, 18)", fullType, e);
+            LOG.warn(
+                    "Failed to parse precision/scale from '{}', using default (38, 18)",
+                    fullType,
+                    e);
         }
         return new int[] {p, s};
     }

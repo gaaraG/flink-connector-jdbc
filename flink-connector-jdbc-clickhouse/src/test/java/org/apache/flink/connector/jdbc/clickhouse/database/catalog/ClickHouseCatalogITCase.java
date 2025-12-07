@@ -47,7 +47,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
     }
 
     @Test
-    void testListDatabases() throws Exception {
+    void testListDatabases() {
         JdbcCatalog catalog =
                 new ClickHouseCatalog(
                         Thread.currentThread().getContextClassLoader(),
@@ -67,7 +67,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
     }
 
     @Test
-    void testDatabaseExists() throws Exception {
+    void testDatabaseExists() {
         JdbcCatalog catalog =
                 new ClickHouseCatalog(
                         Thread.currentThread().getContextClassLoader(),
