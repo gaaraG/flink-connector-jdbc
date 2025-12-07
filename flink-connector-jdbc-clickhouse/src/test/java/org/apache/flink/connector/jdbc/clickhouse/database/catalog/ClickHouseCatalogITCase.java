@@ -85,7 +85,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
     }
 
     @Test
-    void testNonExistingDatabase() throws Exception {
+    void testNonExistingDatabase() {
         JdbcCatalog catalog =
                 new ClickHouseCatalog(
                         Thread.currentThread().getContextClassLoader(),

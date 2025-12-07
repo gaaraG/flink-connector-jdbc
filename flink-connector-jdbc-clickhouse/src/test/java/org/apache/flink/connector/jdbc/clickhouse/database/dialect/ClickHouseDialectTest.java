@@ -36,7 +36,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/** Tests for {@link ClickHouseDialect}. */
+/**
+ * Tests for {@link ClickHouseDialect}.
+ */
 class ClickHouseDialectTest implements ClickHouseTestBase {
 
     private ClickHouseDialect dialect;
@@ -56,7 +58,7 @@ class ClickHouseDialectTest implements ClickHouseTestBase {
     void testSqlFragments() {
         assertThat(dialect.getLimitClause(10)).isEqualTo("LIMIT 10");
         assertThat(dialect.quoteIdentifier("TableName")).isEqualTo("`TableName`");
-        assertThat(dialect.getUpsertStatement("tbl", new String[] {"id"}, new String[] {"id"}))
+        assertThat(dialect.getUpsertStatement("tbl", new String[]{"id"}, new String[]{"id"}))
                 .isEmpty();
     }
 
@@ -104,10 +106,10 @@ class ClickHouseDialectTest implements ClickHouseTestBase {
         // Only test invalid precision - but we need to catch the exception when creating the type
         // itself
         assertThatThrownBy(
-                        () -> {
-                            RowType invalidRowType = RowType.of(new DecimalType(76, 0));
-                            dialect.validate(invalidRowType);
-                        })
+                () -> {
+                    RowType invalidRowType = RowType.of(new DecimalType(76, 0));
+                    dialect.validate(invalidRowType);
+                })
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining(
                         "Decimal precision must be between 1 and 38 (both inclusive).");
@@ -122,10 +124,10 @@ class ClickHouseDialectTest implements ClickHouseTestBase {
         // Only test invalid precision - but we need to catch the exception when creating the type
         // itself
         assertThatThrownBy(
-                        () -> {
-                            RowType invalidRowType = RowType.of(new TimestampType(10));
-                            dialect.validate(invalidRowType);
-                        })
+                () -> {
+                    RowType invalidRowType = RowType.of(new TimestampType(10));
+                    dialect.validate(invalidRowType);
+                })
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining(
                         "Timestamp precision must be between 0 and 9 (both inclusive).");
@@ -133,19 +135,7 @@ class ClickHouseDialectTest implements ClickHouseTestBase {
 
     @Test
     void testArrayAndMapTypesSupport() {
-        List<String> arrayAndMapTypes =
-                Arrays.asList(
-                        "ARRAY<INTEGER>",
-                        "ARRAY<VARCHAR>",
-                        "MAP<VARCHAR, INTEGER>",
-                        "MAP<INTEGER, VARCHAR>",
-                        "MAP<VARCHAR, MAP<VARCHAR, INTEGER>>");
-
-        for (String type : arrayAndMapTypes) {
-            // These types should be supported by ClickHouse dialect
-            // Note: Actual validation would happen at the catalog level
-            assertThat(dialect.supportedTypes())
-                    .contains(LogicalTypeRoot.ARRAY, LogicalTypeRoot.MAP);
-        }
+        assertThat(dialect.supportedTypes())
+                .contains(LogicalTypeRoot.ARRAY, LogicalTypeRoot.MAP);
     }
 }
