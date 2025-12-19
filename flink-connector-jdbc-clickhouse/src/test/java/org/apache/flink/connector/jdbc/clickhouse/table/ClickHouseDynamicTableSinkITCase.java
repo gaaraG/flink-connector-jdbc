@@ -20,26 +20,33 @@ package org.apache.flink.connector.jdbc.clickhouse.table;
 
 import org.apache.flink.connector.jdbc.clickhouse.database.dialect.ClickHouseDialect;
 import org.apache.flink.connector.jdbc.core.table.sink.JdbcDynamicTableSinkITCase;
+import org.apache.flink.connector.jdbc.testutils.DatabaseMetadata;
+import org.apache.flink.connector.jdbc.testutils.TableManaged;
 import org.apache.flink.connector.jdbc.testutils.tables.TableRow;
 import org.apache.flink.table.api.DataTypes;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.apache.flink.connector.jdbc.clickhouse.ClickHouseTestBase.tableRow;
 import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.dbType;
 import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.field;
-import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.pkField;
-import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.tableRow;
 
 /** The Table Sink ITCase for {@link ClickHouseDialect}. */
 class ClickHouseDynamicTableSinkITCase extends JdbcDynamicTableSinkITCase
         implements ClickHouseTableTestBase {
 
     @Override
-    protected TableRow createUpsertOutputTable() {
-        return tableRow(
-                "dynamicSinkForUpsert",
-                pkField("cnt", DataTypes.BIGINT().notNull()),
-                field("lencnt", DataTypes.BIGINT().notNull()),
-                pkField("cTag", DataTypes.INT().notNull()),
-                field("ts", dbType("DateTime64(3)"), DataTypes.TIMESTAMP(3)));
+    public List<TableManaged> getManagedTables() {
+        return Arrays.asList(
+                // upsertOutputTable,
+                appendOutputTable, batchOutputTable, realOutputTable, checkpointOutputTable
+                // userOutputTable
+                );
     }
 
     @Override
@@ -48,6 +55,53 @@ class ClickHouseDynamicTableSinkITCase extends JdbcDynamicTableSinkITCase
                 "dynamicSinkForAppend",
                 field("id", DataTypes.INT().notNull()),
                 field("num", DataTypes.BIGINT().notNull()),
-                field("ts", dbType("DateTime64(3)"), DataTypes.TIMESTAMP(3)));
+                field("ts", dbType("DateTime64(3, 'UTC')"), DataTypes.TIMESTAMP(3)));
+    }
+
+    @Override
+    protected TableRow createBatchOutputTable() {
+        return tableRow(
+                "dynamicSinkForBatch",
+                field("NAME", DataTypes.VARCHAR(20).notNull()),
+                field("SCORE", DataTypes.BIGINT().notNull()));
+    }
+
+    @Override
+    protected TableRow createRealOutputTable() {
+        return tableRow("REAL_TABLE", field("real_data", dbType("REAL"), DataTypes.FLOAT()));
+    }
+
+    @Override
+    protected TableRow createCheckpointOutputTable() {
+        return tableRow("checkpointTable", field("id", DataTypes.BIGINT().notNull()));
+    }
+
+    @Disabled("ClickHouse dont allow create tables with PK")
+    @Test
+    @Override
+    protected void testUpsert() throws Exception {
+        DatabaseMetadata dbMeta = getMetadata();
+        try (Connection conn = dbMeta.getConnection()) {
+            try {
+                upsertOutputTable.createTable(conn);
+                super.testUpsert();
+            } finally {
+                upsertOutputTable.deleteTable(conn);
+            }
+        }
+    }
+
+    @Disabled("ClickHouse dont allow create tables with PK")
+    @Test
+    @Override
+    protected void testReadingFromChangelogSource() throws Exception {
+        try (Connection conn = getMetadata().getConnection()) {
+            try {
+                userOutputTable.createTable(conn);
+                super.testReadingFromChangelogSource();
+            } finally {
+                userOutputTable.deleteTable(conn);
+            }
+        }
     }
 }

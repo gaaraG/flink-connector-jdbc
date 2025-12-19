@@ -44,6 +44,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -81,13 +82,20 @@ public class ClickHouseDialectConverter extends AbstractDialectConverter {
                                 : (int) ((Date) val).toLocalDate().toEpochDay();
             case TIMESTAMP_WITH_LOCAL_TIME_ZONE:
             case TIMESTAMP_WITHOUT_TIME_ZONE:
-                return val ->
-                        val instanceof OffsetDateTime
-                                ? TimestampData.fromLocalDateTime(
-                                        ((OffsetDateTime) val).toLocalDateTime())
-                                : val instanceof LocalDateTime
-                                        ? TimestampData.fromLocalDateTime((LocalDateTime) val)
-                                        : TimestampData.fromTimestamp((Timestamp) val);
+                return val -> {
+                    ZoneId targetZone = ZoneId.systemDefault();
+                    if (val instanceof OffsetDateTime) {
+                        return TimestampData.fromLocalDateTime(
+                                ((OffsetDateTime) val)
+                                        .atZoneSameInstant(targetZone)
+                                        .toLocalDateTime());
+                    } else if (val instanceof LocalDateTime) {
+                        return TimestampData.fromLocalDateTime(
+                                ((LocalDateTime) val).atZone(targetZone).toLocalDateTime());
+                    } else
+                        return TimestampData.fromLocalDateTime(
+                                ((Timestamp) val).toInstant().atZone(targetZone).toLocalDateTime());
+                };
             case ARRAY:
                 return createArrayInternalConverter((ArrayType) type);
             case MAP:

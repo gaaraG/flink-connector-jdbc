@@ -28,15 +28,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
+import static org.apache.flink.connector.jdbc.clickhouse.ClickHouseTestBase.tableRow;
 import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.dbType;
 import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.field;
-import static org.apache.flink.connector.jdbc.clickhouse.ClickHouseTestBase.tableRow;
 
-/**
- * The Table Source ITCase for {@link ClickHouseDialect}.
- */
+/** The Table Source ITCase for {@link ClickHouseDialect}. */
 class ClickHouseDynamicTableSourceITCase extends JdbcDynamicTableSourceITCase
         implements ClickHouseTableTestBase {
 
@@ -46,7 +43,7 @@ class ClickHouseDynamicTableSourceITCase extends JdbcDynamicTableSourceITCase
                 "jdbDynamicTableSource",
                 field("id", DataTypes.BIGINT().notNull()),
                 field("decimal_col", DataTypes.DECIMAL(10, 4)),
-                field("timestamp6_col", DataTypes.TIMESTAMP(6)),
+                field("timestamp6_col", dbType("DateTime64(6, 'UTC')"), DataTypes.TIMESTAMP(6)),
                 // other fields
                 field("float_col", dbType("Float32"), DataTypes.FLOAT()),
                 field("double_col", dbType("Float64"), DataTypes.DOUBLE()),
@@ -55,8 +52,6 @@ class ClickHouseDynamicTableSourceITCase extends JdbcDynamicTableSourceITCase
 
     @Override
     protected List<Row> getTestData() {
-        TimeZone timeZone = TimeZone.getTimeZone("GTM+0");
-        TimeZone.setDefault(timeZone);
         return Arrays.asList(
                 Row.of(
                         1L,

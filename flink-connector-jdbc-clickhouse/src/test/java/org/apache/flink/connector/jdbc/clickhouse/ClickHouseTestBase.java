@@ -22,14 +22,12 @@ import org.apache.flink.connector.jdbc.clickhouse.table.ClickHouseTableRow;
 import org.apache.flink.connector.jdbc.clickhouse.testutils.ClickHouseDatabase;
 import org.apache.flink.connector.jdbc.testutils.DatabaseMetadata;
 import org.apache.flink.connector.jdbc.testutils.DatabaseTest;
-
 import org.apache.flink.connector.jdbc.testutils.tables.TableField;
 import org.apache.flink.connector.jdbc.testutils.tables.TableRow;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 
-/**
- * Base class for ClickHouse testing.
- */
+/** Base class for ClickHouse testing. */
 @ExtendWith(ClickHouseDatabase.class)
 public interface ClickHouseTestBase extends DatabaseTest {
 

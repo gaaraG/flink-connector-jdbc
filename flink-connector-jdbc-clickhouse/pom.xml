@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <clickhouse.version>0.6.4</clickhouse.version>
+        <clickhouse.version>0.7.2</clickhouse.version>
     </properties>
 
     <dependencies>
