@@ -33,6 +33,7 @@ import org.apache.flink.util.CollectionUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -195,7 +196,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
     }
 
     protected void assertRowsEquals(List<Row> expected, List<Row> actual) {
-        assertEquals(expected.size(), actual.size());
+        Assertions.assertEquals(expected.size(), actual.size());
 
         for (int i = 0; i < expected.size(); i++) {
             Row r1 = expected.get(i);
@@ -206,7 +207,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
                 String s1 = normalizeObjectToString(o1);
                 String s2 = normalizeObjectToString(o2);
 
-                assertEquals("Row " + i + ", Field " + fi + " mismatch", s1, s2);
+                Assertions.assertEquals(s1, s2, "Row " + i + ", Field " + fi + " mismatch");
             }
         }
     }
@@ -282,7 +283,7 @@ class ClickHouseCatalogITCase implements ClickHouseTestBase {
 
     private void clickhouseTableSchemaEquals(Schema expected, Schema actual) {
         for (int i = 0; i < expected.getColumns().size(); i++) {
-            assertEquals(expected.getColumns().get(i), actual.getColumns().get(i));
+            Assertions.assertEquals(expected.getColumns().get(i), actual.getColumns().get(i));
         }
     }
 

@@ -106,7 +106,7 @@ public class ClickHouseTableRow extends TableRow {
                     for (int i = 0; i < row.getArity(); i++) {
                         DataType type = fields[i].getDataType();
                         LogicalTypeRoot typeRoot = type.getLogicalType().getTypeRoot();
-                        int dbType = 0;
+                        int dbType;
                         if (typeRoot == LogicalTypeRoot.MAP) {
                             dbType = Types.STRUCT;
                         } else {
