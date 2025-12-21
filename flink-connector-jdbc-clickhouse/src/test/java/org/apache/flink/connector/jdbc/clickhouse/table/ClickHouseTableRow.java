@@ -3,10 +3,18 @@ package org.apache.flink.connector.jdbc.clickhouse.table;
 import org.apache.flink.connector.jdbc.testutils.functions.JdbcResultSetBuilder;
 import org.apache.flink.connector.jdbc.testutils.tables.TableField;
 import org.apache.flink.connector.jdbc.testutils.tables.TableRow;
+import org.apache.flink.connector.jdbc.utils.JdbcTypeUtil;
 import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.types.Row;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,7 +30,7 @@ public class ClickHouseTableRow extends TableRow {
         super(name, fields);
     }
 
-    private static final String CLICKHOUSE_ENGINE = " ENGINE = MergeTree() ORDER BY tuple()";
+    private static final String CLICKHOUSE_DEFAULT_ENGINE = " ENGINE = Memory";
 
     @Override
     protected String getDeleteFromQuery() {
@@ -36,7 +44,7 @@ public class ClickHouseTableRow extends TableRow {
             baseDDL = baseDDL.substring(0, baseDDL.length() - 1);
         }
 
-        return baseDDL + CLICKHOUSE_ENGINE;
+        return baseDDL + CLICKHOUSE_DEFAULT_ENGINE;
     }
 
     @Override
@@ -56,6 +64,9 @@ public class ClickHouseTableRow extends TableRow {
                     } else if (conversionClass.equals(LocalDateTime.class)) {
                         Object value = rs.getObject(i + 1);
                         if (value instanceof OffsetDateTime) {
+                            // https://github.com/ClickHouse/clickhouse-java/issues/2496
+                            // The timestamp offset issue is expected to be resolved in version
+                            // 0.9.5.
                             LocalDateTime dt =
                                     ((OffsetDateTime) value)
                                             .atZoneSameInstant(ZoneId.systemDefault())
@@ -83,5 +94,41 @@ public class ClickHouseTableRow extends TableRow {
             }
             return result;
         };
+    }
+
+    @Override
+    public void insertIntoTableValues(Connection conn, List<Row> values) throws SQLException {
+        executeStatement(
+                conn,
+                getInsertIntoQuery(),
+                (ps, row) -> {
+                    DataTypes.Field[] fields = getTableDataFields();
+                    for (int i = 0; i < row.getArity(); i++) {
+                        DataType type = fields[i].getDataType();
+                        LogicalTypeRoot typeRoot = type.getLogicalType().getTypeRoot();
+                        int dbType = 0;
+                        if (typeRoot == LogicalTypeRoot.MAP) {
+                            dbType = Types.STRUCT;
+                        } else {
+                            dbType = JdbcTypeUtil.logicalTypeToSqlType(typeRoot);
+                        }
+                        if (row.getField(i) == null) {
+                            ps.setNull(i + 1, dbType);
+                        } else {
+                            if (type.getConversionClass().equals(LocalTime.class)) {
+                                Time time = Time.valueOf(row.<LocalTime>getFieldAs(i));
+                                ps.setTime(i + 1, time);
+                            } else if (type.getConversionClass().equals(LocalDate.class)) {
+                                ps.setDate(i + 1, Date.valueOf(row.<LocalDate>getFieldAs(i)));
+                            } else if (type.getConversionClass().equals(LocalDateTime.class)) {
+                                ps.setTimestamp(
+                                        i + 1, Timestamp.valueOf(row.<LocalDateTime>getFieldAs(i)));
+                            } else {
+                                ps.setObject(i + 1, row.getField(i));
+                            }
+                        }
+                    }
+                },
+                values);
     }
 }

@@ -41,13 +41,11 @@ class ClickHouseDialectConverterTest implements ClickHouseTestBase {
 
     @Test
     void testArrayConversionFromResultSet() throws SQLException {
-        // Test array of integers conversion from ResultSet
         ArrayType intArrayType = new ArrayType(new IntType());
         RowType rowType = RowType.of(new ArrayType[] {intArrayType}, new String[] {"int_array"});
 
         ClickHouseDialectConverter converter = new ClickHouseDialectConverter(rowType);
 
-        // Create mock ResultSet with array data
         ResultSet resultSet = mock(ResultSet.class);
         Array mockArray = mock(Array.class);
         Integer[] intArray = {1, 2, 3, 4, 5};
@@ -55,7 +53,6 @@ class ClickHouseDialectConverterTest implements ClickHouseTestBase {
         when(resultSet.getObject(1)).thenReturn(mockArray);
         when(mockArray.getArray()).thenReturn(intArray);
 
-        // Convert and check
         RowData rowData = converter.toInternal(resultSet);
         ArrayData resultArray = rowData.getArray(0);
         assertThat(resultArray).isNotNull();
@@ -67,14 +64,12 @@ class ClickHouseDialectConverterTest implements ClickHouseTestBase {
 
     @Test
     void testStringArrayConversionFromResultSet() throws SQLException {
-        // Test array of strings conversion from ResultSet
         ArrayType stringArrayType = new ArrayType(new VarCharType());
         RowType rowType =
                 RowType.of(new ArrayType[] {stringArrayType}, new String[] {"string_array"});
 
         ClickHouseDialectConverter converter = new ClickHouseDialectConverter(rowType);
 
-        // Create mock ResultSet with string array data
         ResultSet resultSet = mock(ResultSet.class);
         Array mockArray = mock(Array.class);
         String[] stringArray = {"first", "second", "third"};
@@ -82,7 +77,6 @@ class ClickHouseDialectConverterTest implements ClickHouseTestBase {
         when(resultSet.getObject(1)).thenReturn(mockArray);
         when(mockArray.getArray()).thenReturn(stringArray);
 
-        // Convert and check
         RowData rowData = converter.toInternal(resultSet);
         ArrayData resultArray = rowData.getArray(0);
         assertThat(resultArray).isNotNull();

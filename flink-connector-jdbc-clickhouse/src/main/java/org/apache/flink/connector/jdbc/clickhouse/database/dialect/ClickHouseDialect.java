@@ -107,7 +107,6 @@ public class ClickHouseDialect extends AbstractDialect {
                 LogicalTypeRoot.DOUBLE,
                 LogicalTypeRoot.DATE,
                 LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
-                LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
                 LogicalTypeRoot.ARRAY,
                 LogicalTypeRoot.MAP);
     }

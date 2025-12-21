@@ -30,7 +30,7 @@ public class ClickHouseDatabase extends DatabaseExtension implements ClickHouseI
 
     private static final ClickHouseContainer CONTAINER =
             new ClickHouseContainer(CLICKHOUSE_23_3)
-                    .withEnv("CLICKHOUSE_DB", "default")
+                    .withEnv("CLICKHOUSE_DB", "test")
                     .withPassword("test");
 
     private static ClickHouseMetadata metadata;

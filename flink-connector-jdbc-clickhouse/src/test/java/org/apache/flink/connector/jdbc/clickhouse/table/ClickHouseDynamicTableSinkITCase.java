@@ -18,6 +18,7 @@
 
 package org.apache.flink.connector.jdbc.clickhouse.table;
 
+import org.apache.flink.connector.jdbc.clickhouse.ClickHouseTestBase;
 import org.apache.flink.connector.jdbc.clickhouse.database.dialect.ClickHouseDialect;
 import org.apache.flink.connector.jdbc.core.table.sink.JdbcDynamicTableSinkITCase;
 import org.apache.flink.connector.jdbc.testutils.DatabaseMetadata;
@@ -38,7 +39,7 @@ import static org.apache.flink.connector.jdbc.testutils.tables.TableBuilder.fiel
 
 /** The Table Sink ITCase for {@link ClickHouseDialect}. */
 class ClickHouseDynamicTableSinkITCase extends JdbcDynamicTableSinkITCase
-        implements ClickHouseTableTestBase {
+        implements ClickHouseTestBase {
 
     @Override
     public List<TableManaged> getManagedTables() {

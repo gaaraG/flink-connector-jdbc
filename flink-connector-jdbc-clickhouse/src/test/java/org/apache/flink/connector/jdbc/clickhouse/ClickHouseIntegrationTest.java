@@ -102,7 +102,6 @@ class ClickHouseIntegrationTest implements ClickHouseTestBase {
                         LogicalTypeRoot.DOUBLE,
                         LogicalTypeRoot.DATE,
                         LogicalTypeRoot.TIMESTAMP_WITHOUT_TIME_ZONE,
-                        LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE,
                         LogicalTypeRoot.ARRAY,
                         LogicalTypeRoot.MAP);
     }

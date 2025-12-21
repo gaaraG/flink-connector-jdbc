@@ -118,12 +118,8 @@ public class ClickHouseTypeMapper implements JdbcCatalogTypeMapper {
                 return DataTypes.BIGINT();
             case CK_UINT64:
                 // UInt64 max value (18446744073709551615) exceeds Java Long.MAX_VALUE.
-                // We use DECIMAL(20, 0) to hold the full range safely.
-                return DataTypes.DECIMAL(20, 0);
+                return DataTypes.STRING();
             case CK_INT128:
-            case CK_UINT128:
-            case CK_INT256:
-            case CK_UINT256:
             case CK_DECIMAL:
             case CK_DECIMAL32:
             case CK_DECIMAL64:
@@ -147,9 +143,17 @@ public class ClickHouseTypeMapper implements JdbcCatalogTypeMapper {
                 }
                 return DataTypes.DECIMAL(precision, scale);
             case CK_FLOAT32:
-                return DataTypes.FLOAT();
+                // https://clickhouse.com/docs/sql-reference/data-types/float
+                if (driverVersion.compareTo("0.7.2") > 0) {
+                    return DataTypes.DOUBLE();
+                } else {
+                    return DataTypes.FLOAT();
+                }
             case CK_FLOAT64:
                 return DataTypes.DOUBLE();
+            case CK_UINT128:
+            case CK_INT256:
+            case CK_UINT256:
             case CK_STRING:
             case CK_FIXED_STRING:
             case CK_ENUM8:

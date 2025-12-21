@@ -62,7 +62,6 @@ class ClickHouseFactoryTest implements ClickHouseTestBase {
                         getMetadata().getJdbcUrl());
 
         assertThat(catalog).isNotNull();
-        // Simply check that the catalog was created successfully
         assertThat(catalog).isInstanceOf(ClickHouseCatalog.class);
     }
 }

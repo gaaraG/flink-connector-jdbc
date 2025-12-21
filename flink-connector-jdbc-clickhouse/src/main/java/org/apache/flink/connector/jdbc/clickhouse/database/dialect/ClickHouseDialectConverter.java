@@ -80,21 +80,20 @@ public class ClickHouseDialectConverter extends AbstractDialectConverter {
                         val instanceof LocalDate
                                 ? (int) ((LocalDate) val).toEpochDay()
                                 : (int) ((Date) val).toLocalDate().toEpochDay();
-            case TIMESTAMP_WITH_LOCAL_TIME_ZONE:
             case TIMESTAMP_WITHOUT_TIME_ZONE:
                 return val -> {
-                    ZoneId targetZone = ZoneId.systemDefault();
+                    // https://github.com/ClickHouse/clickhouse-java/issues/2496
+                    // The timestamp offset issue is expected to be resolved in version 0.9.5.
                     if (val instanceof OffsetDateTime) {
                         return TimestampData.fromLocalDateTime(
                                 ((OffsetDateTime) val)
-                                        .atZoneSameInstant(targetZone)
+                                        .atZoneSameInstant(ZoneId.systemDefault())
                                         .toLocalDateTime());
                     } else if (val instanceof LocalDateTime) {
-                        return TimestampData.fromLocalDateTime(
-                                ((LocalDateTime) val).atZone(targetZone).toLocalDateTime());
-                    } else
-                        return TimestampData.fromLocalDateTime(
-                                ((Timestamp) val).toInstant().atZone(targetZone).toLocalDateTime());
+                        return TimestampData.fromLocalDateTime((LocalDateTime) val);
+                    } else {
+                        return TimestampData.fromTimestamp((Timestamp) val);
+                    }
                 };
             case ARRAY:
                 return createArrayInternalConverter((ArrayType) type);
@@ -123,6 +122,16 @@ public class ClickHouseDialectConverter extends AbstractDialectConverter {
                 } catch (SQLException e) {
                     throw new RuntimeException("Failed to convert array", e);
                 }
+            } else if (val != null && val.getClass().isArray()) {
+                int length = java.lang.reflect.Array.getLength(val);
+                Object[] convertedArray =
+                        (Object[]) java.lang.reflect.Array.newInstance(elementClass, length);
+
+                for (int i = 0; i < length; i++) {
+                    Object element = java.lang.reflect.Array.get(val, i);
+                    convertedArray[i] = elementConverter.deserialize(element);
+                }
+                return new GenericArrayData(convertedArray);
             }
 
             return val;
@@ -158,16 +167,25 @@ public class ClickHouseDialectConverter extends AbstractDialectConverter {
         LogicalTypeRoot root = type.getTypeRoot();
         if (root == LogicalTypeRoot.ARRAY) {
             return createArrayExternalConverter((ArrayType) type);
-
         } else if (root == LogicalTypeRoot.MAP) {
             return createMapExternalConverter((MapType) type);
         } else {
-            return super.createNullableExternalConverter(type);
+            return createExternalConverter(type);
         }
     }
 
     @Override
     protected JdbcSerializationConverter createExternalConverter(LogicalType type) {
+        JdbcSerializationConverter externalConverter = super.createExternalConverter(type);
+        if (type.isNullable()) {
+            return (val, index, statement) -> {
+                if (val.isNullAt(index)) {
+                    statement.setObject(index, null);
+                } else {
+                    externalConverter.serialize(val, index, statement);
+                }
+            };
+        }
         switch (type.getTypeRoot()) {
             case DECIMAL:
                 final int decimalPrecision = ((DecimalType) type).getPrecision();
@@ -182,7 +200,7 @@ public class ClickHouseDialectConverter extends AbstractDialectConverter {
             case MAP:
                 return createMapExternalConverter((MapType) type);
             default:
-                return super.createExternalConverter(type);
+                return externalConverter;
         }
     }
 
